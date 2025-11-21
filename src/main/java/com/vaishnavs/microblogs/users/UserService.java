@@ -3,6 +3,8 @@ package com.vaishnavs.microblogs.users;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vaishnavs.microblogs.exception.BadRequestException;
+import com.vaishnavs.microblogs.exception.ResourceNotFoundException;
 import com.vaishnavs.microblogs.utils.OTP;
 
 @Service
@@ -20,7 +22,7 @@ public class UserService {
 
   public UserEntity create(String email, String password) {
     if (userRepo.findByEmail(email) != null) {
-      throw new RuntimeException("Email already in use!");
+      throw new BadRequestException("Email already in use!");
     }
 
     UserEntity user = new UserEntity();
@@ -38,11 +40,11 @@ public class UserService {
   public UserDto verifyEmail(String otp, String email) {
     UserEntity user = userRepo.findByEmail(email);
     if (user == null) {
-      throw new RuntimeException("User not found by email!");
+      throw new BadRequestException("User not found by email!");
     }
 
     if (!user.getVerificationCode().equals(otp)) {
-      throw new RuntimeException("Invalid OTP!");
+      throw new BadRequestException("Invalid OTP!");
     }
 
     user.setVerificationCode(null);
@@ -54,17 +56,17 @@ public class UserService {
 
   public UserEntity getBy(String id) {
     return userRepo.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found by id"));
+        .orElseThrow(() -> new ResourceNotFoundException("User not found by id: " + id));
   }
 
   public UserEntity authenticate(String email, String password) {
     UserEntity user = userRepo.findByEmail(email);
     if (user == null) {
-      throw new RuntimeException("User not found by email!");
+      throw new ResourceNotFoundException("User not found by email " + email);
     }
 
     if (!passwordEncoder.matches(password, user.getPassword())) {
-      throw new RuntimeException("Invalid password!");
+      throw new BadRequestException("Invalid password!");
     }
 
     return user;
