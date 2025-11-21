@@ -1,0 +1,19 @@
+package com.vaishnavs.microblogs.users;
+
+public record UserDto(
+    String id,
+    String email,
+    String firstName,
+    String lastName,
+    Boolean isActive
+) {
+    public static UserDto fromEntity(UserEntity entity) {
+        return new UserDto(
+            entity.getId(),
+            entity.getEmail(),
+            entity.getFirstName(),
+            entity.getLastName(),
+            entity.getIsActive()
+        );
+    }
+}
