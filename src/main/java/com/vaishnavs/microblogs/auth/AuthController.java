@@ -50,4 +50,16 @@ public class AuthController {
 
     return new ResponseEntity<>(user, HttpStatus.OK);
   }
+
+  @PostMapping("/login")
+  public ResponseEntity<UserDto> login(
+      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    UserEntity user = userService.authenticate(request.getEmail(), request.getPassword());
+
+    String token = jwtService.generateToken(user.getId());
+    Cookie cookie = Cookies.createCookieToken(token);
+    response.addCookie(cookie);
+
+    return ResponseEntity.ok(UserDto.fromEntity(user));
+  }
 }

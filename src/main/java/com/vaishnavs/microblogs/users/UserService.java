@@ -56,4 +56,17 @@ public class UserService {
     return userRepo.findById(id)
         .orElseThrow(() -> new RuntimeException("User not found by id"));
   }
+
+  public UserEntity authenticate(String email, String password) {
+    UserEntity user = userRepo.findByEmail(email);
+    if (user == null) {
+      throw new RuntimeException("User not found by email!");
+    }
+
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+      throw new RuntimeException("Invalid password!");
+    }
+
+    return user;
+  }
 }
