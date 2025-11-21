@@ -1,6 +1,7 @@
 package com.vaishnavs.microblogs.exception;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +31,17 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<?> handleValidationError(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-    java.util.Map<String, String> errors = new HashMap<>();
+    Map<String, Object> extra = new HashMap<>();
 
     ex.getBindingResult().getFieldErrors()
-        .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
+        .forEach(err -> extra.put(err.getField(), err.getDefaultMessage()));
 
-    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.BAD_REQUEST.getReasonPhrase(),
+        "Validation failed",
+        extra);
+
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
