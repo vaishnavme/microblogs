@@ -20,4 +20,13 @@ public class ErrorResponse {
     this.code = code;
     this.error = new ErrorDetails(message, data);
   }
+
+  @Override
+  public String toString() {
+    return "ErrorResponse{" +
+        "code='" + code + '\'' +
+        ", error=" + error.toString() +
+        '}';
+  }
+
 }

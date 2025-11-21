@@ -14,4 +14,12 @@ public class ErrorDetails {
   public ErrorDetails(String message) {
     this.message = message;
   }
+
+  @Override
+  public String toString() {
+    return "ErrorDetails{" +
+        "message='" + message + '\'' +
+        ", data=" + (data != null ? data.toString() : "null") +
+        '}';
+  }
 }
