@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.vaishnavs.microblogs.exception.UnauthorizedException;
 import com.vaishnavs.microblogs.model.UserEntity;
 import com.vaishnavs.microblogs.principal.UserPrincipal;
 import com.vaishnavs.microblogs.service.UserService;
@@ -44,27 +45,28 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             .orElse(null);
 
         if (tokenCookie.getValue() != null) {
-          try {
-
-            String id = jwtService.validatedJWTToken(tokenCookie.getValue());
-            UserEntity user = userService.getBy(id);
-            UserPrincipal principal = new UserPrincipal(user);
-            System.out.println("Authenticated user: " + user.getEmail());
-            System.out.println("principal user: " + principal.getEmail());
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
-                null,
-                principal.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-          } catch (Exception e) {
-            System.out.println("JWT validation failed: " + e.getMessage());
-            //
-          }
+          throw new UnauthorizedException("Invalid access!");
         }
+
+        String id = jwtService.validatedJWTToken(tokenCookie.getValue());
+        UserEntity user = userService.getBy(id);
+
+        if (user == null) {
+          throw new UnauthorizedException("Invalid access!");
+        }
+
+        UserPrincipal principal = new UserPrincipal(user);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
+            null,
+            principal.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
       }
 
     } catch (Exception e) {
-      //
+      throw new UnauthorizedException("Invalid access!");
     }
 
     filterChain.doFilter(request, response);

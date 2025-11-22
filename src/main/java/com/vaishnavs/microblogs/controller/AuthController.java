@@ -13,7 +13,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,17 +41,17 @@ public class AuthController {
     Cookie cookie = Cookies.createCookieToken(token);
     httpServletResponse.addCookie(cookie);
 
-    return new ResponseEntity<>(UserDto.fromEntity(user), HttpStatus.OK);
+    return ResponseEntity.ok(UserDto.fromEntity(user));
   }
 
   @PostMapping("/verify")
   public ResponseEntity<UserDto> verifyEmail(
       @Valid @RequestBody VerifyEmailRequestDto verifyEmailRequestDto,
-      @AuthenticationPrincipal UserPrincipal principal) {
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-    UserDto user = userService.verifyEmail(verifyEmailRequestDto.getOtp(), principal.getEmail());
+    UserDto user = userService.verifyEmail(verifyEmailRequestDto.getOtp(), userPrincipal.getEmail());
 
-    return new ResponseEntity<>(user, HttpStatus.OK);
+    return ResponseEntity.ok(user);
   }
 
   @PostMapping("/login")
