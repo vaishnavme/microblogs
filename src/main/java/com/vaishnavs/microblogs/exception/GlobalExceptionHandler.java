@@ -11,7 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.vaishnavs.microblogs.users.UserPrincipal;
+import com.vaishnavs.microblogs.principal.UserPrincipal;
 
 import jakarta.servlet.http.HttpServletRequest;
 

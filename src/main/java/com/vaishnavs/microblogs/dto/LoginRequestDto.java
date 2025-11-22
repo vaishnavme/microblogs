@@ -1,4 +1,4 @@
-package com.vaishnavs.microblogs.auth;
+package com.vaishnavs.microblogs.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequest {
+public class LoginRequestDto {
   @NotBlank(message = "Email is required")
   private String email;
 

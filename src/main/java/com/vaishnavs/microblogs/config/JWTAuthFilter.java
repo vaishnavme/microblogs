@@ -9,9 +9,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.vaishnavs.microblogs.users.UserEntity;
-import com.vaishnavs.microblogs.users.UserPrincipal;
-import com.vaishnavs.microblogs.users.UserService;
+import com.vaishnavs.microblogs.model.UserEntity;
+import com.vaishnavs.microblogs.principal.UserPrincipal;
+import com.vaishnavs.microblogs.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
