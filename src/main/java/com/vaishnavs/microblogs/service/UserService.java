@@ -58,6 +58,9 @@ public class UserService {
   }
 
   public UserEntity getBy(String id) {
+    if (id == null) {
+      throw new BadRequestException("User id cannot be null");
+    }
     return userRepo.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found by id: " + id));
   }
