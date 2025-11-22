@@ -2,7 +2,9 @@ package com.vaishnavs.microblogs.config;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -19,16 +21,29 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 
 @Component
 public class JWTAuthFilter extends OncePerRequestFilter {
 
-  private final JWTService jwtService;
-  private final UserService userService;
+  @Setter
+  @Autowired
+  private JWTService jwtService;
 
-  public JWTAuthFilter(JWTService jwtService, UserService userService) {
-    this.jwtService = jwtService;
-    this.userService = userService;
+  @Setter
+  @Autowired
+  private UserService userService;
+
+  private static final List<String> PUBLIC_PATHS = List.of(
+      "/auth/login",
+      "/auth/signup");
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    String path = request.getRequestURI();
+    // Remove /api prefix if present
+    String cleanPath = path.replaceFirst("^/api", "");
+    return PUBLIC_PATHS.stream().anyMatch(cleanPath::startsWith);
   }
 
   @Override
@@ -44,15 +59,15 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             .findFirst()
             .orElse(null);
 
-        if (tokenCookie.getValue() != null) {
-          throw new UnauthorizedException("Invalid access!");
+        if (tokenCookie.getValue() == null) {
+          throw new UnauthorizedException("Invalid access! 1");
         }
 
         String id = jwtService.validatedJWTToken(tokenCookie.getValue());
         UserEntity user = userService.getBy(id);
 
         if (user == null) {
-          throw new UnauthorizedException("Invalid access!");
+          throw new UnauthorizedException("Invalid access! 2");
         }
 
         UserPrincipal principal = new UserPrincipal(user);
@@ -66,7 +81,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
       }
 
     } catch (Exception e) {
-      throw new UnauthorizedException("Invalid access!");
+      throw new UnauthorizedException("Invalid access! 3");
     }
 
     filterChain.doFilter(request, response);

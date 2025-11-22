@@ -61,8 +61,7 @@ public class UserService {
     if (id == null) {
       throw new BadRequestException("User id cannot be null");
     }
-    return userRepo.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("User not found by id: " + id));
+    return userRepo.findById(id).orElse(null);
   }
 
   public UserEntity authenticate(String email, String password) {
@@ -75,6 +74,27 @@ public class UserService {
       throw new BadRequestException("Invalid password!");
     }
 
+    return user;
+  }
+
+  public UserEntity updateUser(String userId, String firstName, String lastName, String username) {
+    UserEntity user = getBy(userId);
+
+    if (user == null) {
+      throw new ResourceNotFoundException("User not found by id " + userId);
+    }
+
+    if (firstName != null && !firstName.isBlank()) {
+      user.setFirstName(firstName);
+    }
+    if (lastName != null && !lastName.isBlank()) {
+      user.setLastName(lastName);
+    }
+    if (username != null && !username.isBlank()) {
+      user.setUsername(username);
+    }
+
+    userRepo.save(user);
     return user;
   }
 }

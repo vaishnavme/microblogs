@@ -7,6 +7,7 @@ public record UserDto(
     String email,
     String firstName,
     String lastName,
+    String username,
     Boolean isActive) {
   public static UserDto fromEntity(UserEntity entity) {
     return new UserDto(
@@ -14,6 +15,7 @@ public record UserDto(
         entity.getEmail(),
         entity.getFirstName(),
         entity.getLastName(),
+        entity.getUsername(),
         entity.getIsActive());
   }
 }
