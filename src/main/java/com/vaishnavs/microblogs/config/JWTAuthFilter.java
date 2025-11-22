@@ -2,13 +2,16 @@ package com.vaishnavs.microblogs.config;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.vaishnavs.microblogs.exception.UnauthorizedException;
 import com.vaishnavs.microblogs.model.UserEntity;
 import com.vaishnavs.microblogs.principal.UserPrincipal;
 import com.vaishnavs.microblogs.service.UserService;
@@ -18,16 +21,29 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 
 @Component
 public class JWTAuthFilter extends OncePerRequestFilter {
 
-  private final JWTService jwtService;
-  private final UserService userService;
+  @Setter
+  @Autowired
+  private JWTService jwtService;
 
-  public JWTAuthFilter(JWTService jwtService, UserService userService) {
-    this.jwtService = jwtService;
-    this.userService = userService;
+  @Setter
+  @Autowired
+  private UserService userService;
+
+  private static final List<String> PUBLIC_PATHS = List.of(
+      "/auth/login",
+      "/auth/signup");
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    String path = request.getRequestURI();
+    // Remove /api prefix if present
+    String cleanPath = path.replaceFirst("^/api", "");
+    return PUBLIC_PATHS.stream().anyMatch(cleanPath::startsWith);
   }
 
   @Override
@@ -43,28 +59,31 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             .findFirst()
             .orElse(null);
 
-        if (tokenCookie.getValue() != null) {
-          try {
-
-            String id = jwtService.validatedJWTToken(tokenCookie.getValue());
-            UserEntity user = userService.getBy(id);
-            UserPrincipal principal = new UserPrincipal(user);
-            System.out.println("Authenticated user: " + user.getEmail());
-            System.out.println("principal user: " + principal.getEmail());
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
-                null,
-                principal.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-          } catch (Exception e) {
-            System.out.println("JWT validation failed: " + e.getMessage());
-            //
-          }
+        if (tokenCookie == null || tokenCookie.getValue() == null) {
+          throw new UnauthorizedException("Invalid access!");
         }
+
+        String id = jwtService.validatedJWTToken(tokenCookie.getValue());
+        UserEntity user = userService.getBy(id);
+
+        if (user == null) {
+          throw new UnauthorizedException("Invalid access!");
+        }
+
+        UserPrincipal principal = new UserPrincipal(user);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
+            null,
+            principal.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
       }
 
+    } catch (UnauthorizedException ex) {
+      throw ex;
     } catch (Exception e) {
-      //
+      throw new ServletException("Something went wrong while authenticating user!", e);
     }
 
     filterChain.doFilter(request, response);
