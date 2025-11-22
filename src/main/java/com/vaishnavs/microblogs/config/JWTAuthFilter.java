@@ -59,7 +59,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             .findFirst()
             .orElse(null);
 
-        if (tokenCookie.getValue() == null) {
+        if (tokenCookie == null || tokenCookie.getValue() == null) {
           throw new UnauthorizedException("Invalid access!");
         }
 
