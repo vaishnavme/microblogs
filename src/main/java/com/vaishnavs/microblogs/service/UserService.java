@@ -1,5 +1,6 @@
 package com.vaishnavs.microblogs.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,12 +11,22 @@ import com.vaishnavs.microblogs.model.UserEntity;
 import com.vaishnavs.microblogs.repository.UserRepository;
 import com.vaishnavs.microblogs.utils.OTP;
 
+import lombok.Setter;
+
 @Service
 public class UserService {
 
-  private final UserRepository userRepo;
-  private final PasswordEncoder passwordEncoder;
-  private final OTP otpUtils;
+  @Setter
+  @Autowired
+  private UserRepository userRepo;
+
+  @Setter
+  @Autowired
+  private PasswordEncoder passwordEncoder;
+
+  @Setter
+  @Autowired
+  private OTP otpUtils;
 
   public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder, OTP otpUtils) {
     this.userRepo = userRepo;
@@ -91,6 +102,10 @@ public class UserService {
       user.setLastName(lastName);
     }
     if (username != null && !username.isBlank()) {
+      UserEntity existingUser = userRepo.findByUsername(username);
+      if (existingUser != null && !existingUser.getId().equals(userId)) {
+        throw new BadRequestException("Username already in use!");
+      }
       user.setUsername(username);
     }
 

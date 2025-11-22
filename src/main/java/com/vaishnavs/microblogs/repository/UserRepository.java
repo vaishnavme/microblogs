@@ -6,4 +6,6 @@ import com.vaishnavs.microblogs.model.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, String> {
   UserEntity findByEmail(String email);
+
+  UserEntity findByUsername(String username);
 }
