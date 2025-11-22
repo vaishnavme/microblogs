@@ -1,10 +1,13 @@
-package com.vaishnavs.microblogs.auth;
+package com.vaishnavs.microblogs.controller;
 
 import com.vaishnavs.microblogs.config.JWTService;
-import com.vaishnavs.microblogs.users.UserDto;
-import com.vaishnavs.microblogs.users.UserEntity;
-import com.vaishnavs.microblogs.users.UserPrincipal;
-import com.vaishnavs.microblogs.users.UserService;
+import com.vaishnavs.microblogs.dto.LoginRequestDto;
+import com.vaishnavs.microblogs.dto.SignupRequestDto;
+import com.vaishnavs.microblogs.dto.UserDto;
+import com.vaishnavs.microblogs.dto.VerifyEmailRequestDto;
+import com.vaishnavs.microblogs.model.UserEntity;
+import com.vaishnavs.microblogs.principal.UserPrincipal;
+import com.vaishnavs.microblogs.service.UserService;
 import com.vaishnavs.microblogs.utils.Cookies;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,34 +34,35 @@ public class AuthController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<UserDto> signup(@Valid @RequestBody SignupRequest request, HttpServletResponse response) {
-    UserEntity user = userService.create(request.getEmail(), request.getPassword());
+  public ResponseEntity<UserDto> signup(@Valid @RequestBody SignupRequestDto signupRequestDto,
+      HttpServletResponse httpServletResponse) {
+    UserEntity user = userService.create(signupRequestDto.getEmail(), signupRequestDto.getPassword());
 
     String token = jwtService.generateToken(user.getId());
     Cookie cookie = Cookies.createCookieToken(token);
-    response.addCookie(cookie);
+    httpServletResponse.addCookie(cookie);
 
     return new ResponseEntity<>(UserDto.fromEntity(user), HttpStatus.OK);
   }
 
   @PostMapping("/verify")
   public ResponseEntity<UserDto> verifyEmail(
-      @Valid @RequestBody VerifyEmailRequest request,
+      @Valid @RequestBody VerifyEmailRequestDto verifyEmailRequestDto,
       @AuthenticationPrincipal UserPrincipal principal) {
 
-    UserDto user = userService.verifyEmail(request.getOtp(), principal.getEmail());
+    UserDto user = userService.verifyEmail(verifyEmailRequestDto.getOtp(), principal.getEmail());
 
     return new ResponseEntity<>(user, HttpStatus.OK);
   }
 
   @PostMapping("/login")
   public ResponseEntity<UserDto> login(
-      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-    UserEntity user = userService.authenticate(request.getEmail(), request.getPassword());
+      @Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
+    UserEntity user = userService.authenticate(loginRequestDto.getEmail(), loginRequestDto.getPassword());
 
     String token = jwtService.generateToken(user.getId());
     Cookie cookie = Cookies.createCookieToken(token);
-    response.addCookie(cookie);
+    httpServletResponse.addCookie(cookie);
 
     return ResponseEntity.ok(UserDto.fromEntity(user));
   }

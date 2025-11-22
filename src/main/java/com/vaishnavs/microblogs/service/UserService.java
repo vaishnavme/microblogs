@@ -1,10 +1,13 @@
-package com.vaishnavs.microblogs.users;
+package com.vaishnavs.microblogs.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vaishnavs.microblogs.dto.UserDto;
 import com.vaishnavs.microblogs.exception.BadRequestException;
 import com.vaishnavs.microblogs.exception.ResourceNotFoundException;
+import com.vaishnavs.microblogs.model.UserEntity;
+import com.vaishnavs.microblogs.repository.UserRepository;
 import com.vaishnavs.microblogs.utils.OTP;
 
 @Service
