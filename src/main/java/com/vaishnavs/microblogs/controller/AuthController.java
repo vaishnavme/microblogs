@@ -12,9 +12,7 @@ import com.vaishnavs.microblogs.utils.Cookies;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.Setter;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-  @Setter
-  @Autowired
-  private UserService userService;
+  private final UserService userService;
+  private final JWTService jwtService;
 
-  @Setter
-  @Autowired
-  private JWTService jwtService;
+  public AuthController(UserService userService, JWTService jwtService) {
+    this.userService = userService;
+    this.jwtService = jwtService;
+  }
 
   @PostMapping("/signup")
   public ResponseEntity<UserDto> signup(@Valid @RequestBody SignupRequestDto signupRequestDto,

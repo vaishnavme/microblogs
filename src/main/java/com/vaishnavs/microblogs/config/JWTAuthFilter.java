@@ -60,14 +60,14 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             .orElse(null);
 
         if (tokenCookie.getValue() == null) {
-          throw new UnauthorizedException("Invalid access! 1");
+          throw new UnauthorizedException("Invalid access!");
         }
 
         String id = jwtService.validatedJWTToken(tokenCookie.getValue());
         UserEntity user = userService.getBy(id);
 
         if (user == null) {
-          throw new UnauthorizedException("Invalid access! 2");
+          throw new UnauthorizedException("Invalid access!");
         }
 
         UserPrincipal principal = new UserPrincipal(user);
@@ -80,8 +80,10 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
 
+    } catch (UnauthorizedException ex) {
+      throw ex;
     } catch (Exception e) {
-      throw new UnauthorizedException("Invalid access! 3");
+      throw new ServletException("Something went wrong while authenticating user!", e);
     }
 
     filterChain.doFilter(request, response);

@@ -11,27 +11,19 @@ import com.vaishnavs.microblogs.model.UserEntity;
 import com.vaishnavs.microblogs.repository.UserRepository;
 import com.vaishnavs.microblogs.utils.OTP;
 
-import lombok.Setter;
-
 @Service
 public class UserService {
 
-  @Setter
-  @Autowired
-  private UserRepository userRepo;
+  private final UserRepository userRepo;
 
-  @Setter
   @Autowired
   private PasswordEncoder passwordEncoder;
 
-  @Setter
   @Autowired
   private OTP otpUtils;
 
-  public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder, OTP otpUtils) {
+  public UserService(UserRepository userRepo) {
     this.userRepo = userRepo;
-    this.passwordEncoder = passwordEncoder;
-    this.otpUtils = otpUtils;
   }
 
   public UserEntity create(String email, String password) {

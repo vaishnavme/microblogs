@@ -1,6 +1,5 @@
 package com.vaishnavs.microblogs.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +14,15 @@ import com.vaishnavs.microblogs.model.UserEntity;
 import com.vaishnavs.microblogs.principal.UserPrincipal;
 import com.vaishnavs.microblogs.service.UserService;
 
-import lombok.Setter;
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-  @Autowired
-  @Setter
-  private UserService userService;
+  private final UserService userService;
+
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
   @GetMapping("/me")
   public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
